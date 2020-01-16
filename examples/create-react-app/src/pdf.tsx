@@ -7,12 +7,13 @@ import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 const PdfComponent = ({ src }) => {
-  const canvasRef = useRef(null)
+  const canvasRef = useRef(null);
 
   useEffect(() => {
+    let loadingTask;
     const fetchPdf = async () => {
-      const loadingTask = pdfjs.getDocument(src);
-
+      loadingTask = pdfjs.getDocument(src);
+    
       const pdf = await loadingTask.promise;
 
       const firstPageNumber = 1;
@@ -40,6 +41,11 @@ const PdfComponent = ({ src }) => {
     };
 
     fetchPdf();
+    
+    // Ensures that we destroy the worker when the component unmounts.
+    return () => {
+        loadingTask.destroy();
+    }
   }, [src]);
 
   return (
